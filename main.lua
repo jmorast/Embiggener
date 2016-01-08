@@ -55,7 +55,8 @@ controller_right:addEventListener("touch", onObjectTouch )
 local myListener = function( event )
     if ( movingLeft ) then
     	myRectangle.x = myRectangle.x - 5
-    elseif (movingRight) then
+    end
+    if (movingRight) then
     	myRectangle.x = myRectangle.x + 5
     end
 end
