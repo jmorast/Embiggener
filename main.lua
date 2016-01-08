@@ -3,6 +3,12 @@
 -- main.lua
 --
 -----------------------------------------------------------------------------------------
+local movingLeft=false;
+local movingRight=false;
+local direction='Stopped'
+
+
+
 print( "display.contentWidth:display.contentHeight " .. display.contentWidth .. ":" .. display.contentHeight)
 print( "display.actualcontentWidth:display.contentHeight " .. display.actualContentWidth .. ":" .. display.actualContentHeight)
 print( "display.viewableContentWidth    " .. display.viewableContentWidth )
@@ -28,17 +34,29 @@ local function onObjectTouch( event )
     if ( event.phase == "began" ) then
         print( "Touch event began on: " .. event.target.id )
         if ( event.target.id == "Left") then
-        	myRectangle.x = myRectangle.x - 5
+ 			movingLeft=true
 		else
-			--event.target.x = event.target.x + 5
-			myRectangle.x = myRectangle.x + 5
+			movingRight=true
 		end
-        
     elseif ( event.phase == "ended" ) then
         print( "Touch event ended on: " .. event.target.id )
+        if ( event.target.id == "Left") then
+ 			movingLeft=false
+		else
+			movingRight=false
+		end
     end
     return true
 end
 
 controller_left:addEventListener("touch", onObjectTouch )
 controller_right:addEventListener("touch", onObjectTouch )
+
+local myListener = function( event )
+    if ( movingLeft ) then
+    	myRectangle.x = myRectangle.x - 5
+    elseif (movingRight) then
+    	myRectangle.x = myRectangle.x + 5
+    end
+end
+Runtime:addEventListener( "enterFrame", myListener )
