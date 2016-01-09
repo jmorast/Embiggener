@@ -3,8 +3,9 @@
 -- main.lua
 --
 -----------------------------------------------------------------------------------------
-local movingLeft=false;
-local movingRight=false;
+local movingLeft=false
+local movingRight=false
+local playerSpeed = 5
 local direction='Stopped'
 
 print( "display.contentWidth:display.contentHeight " .. display.contentWidth .. ":" .. display.contentHeight)
@@ -20,10 +21,8 @@ local controller_right = display.newRect (display.screenOriginX + display.actual
 controller_right:setFillColor( .5,.2,.2)
 controller_right.id = "Right"
 
-local myRectangle = display.newRect( 55, 300, 20, 20 )
-myRectangle.strokeWidth = 3
+local myRectangle = display.newRect( 55, 300, 80, 20 )
 myRectangle:setFillColor( 0.5 )
-myRectangle:setStrokeColor( 1, 0, 0 )
 myRectangle.id = "le box"
 
 local function onObjectTouch( event )
@@ -42,6 +41,7 @@ local function onObjectTouch( event )
 			movingRight=false
 		end
     end
+    --print ("myrect x : width : " .. myRectangle.width .. ":" .. myRectangle.x)
     return true
 end
 
@@ -49,11 +49,20 @@ controller_left:addEventListener("touch", onObjectTouch )
 controller_right:addEventListener("touch", onObjectTouch )
 
 local myListener = function( event )
+
     if ( movingLeft ) then
-    	myRectangle.x = myRectangle.x - 5
+    	if ((myRectangle.x - myRectangle.width/2) - playerSpeed > display.screenOriginX) then
+            myRectangle.x = myRectangle.x - playerSpeed
+        else
+            myRectangle.x = display.screenOriginX + myRectangle.width/2
+        end
     end
     if (movingRight) then
-    	myRectangle.x = myRectangle.x + 5
+        if ((myRectangle.x + myRectangle.width/2) + playerSpeed < display.actualContentWidth + display.screenOriginX) then
+        	myRectangle.x = myRectangle.x + playerSpeed
+        else
+            myRectangle.x = display.actualContentWidth + display.screenOriginX - myRectangle.width/2
+        end
     end
 end
 Runtime:addEventListener( "enterFrame", myListener )
