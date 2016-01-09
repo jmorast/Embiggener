@@ -7,7 +7,7 @@ local movingLeft=false
 local movingRight=false
 local playerSpeed = 5
 local direction='Stopped'
-
+display.setStatusBar(display.HiddenStatusBar)
 print( "display.contentWidth:display.contentHeight " .. display.contentWidth .. ":" .. display.contentHeight)
 print( "display.actualcontentWidth:display.contentHeight " .. display.actualContentWidth .. ":" .. display.actualContentHeight)
 print( "display.viewableContentWidth    " .. display.viewableContentWidth )
