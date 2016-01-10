@@ -11,6 +11,7 @@ local movingLeft=false
 local movingRight=false
 local playerSpeed = 5
 local direction='Stopped'
+local growPaddleNum=0
 display.setStatusBar(display.HiddenStatusBar)
 print( "display.contentWidth:display.contentHeight " .. display.contentWidth .. ":" .. display.contentHeight)
 print( "display.actualcontentWidth:display.contentHeight " .. display.actualContentWidth .. ":" .. display.actualContentHeight)
@@ -49,6 +50,15 @@ local function spawnBox(boxType,xStart,yStart)
     end
 end
 
+local function growPlayerPaddle()
+    playerPaddle.width = playerPaddle.width + 10
+    if not (physics.removeBody(playerPaddle)) then
+        print( "Could not remove physics body" )
+    end
+    physics.addBody(playerPaddle, "static")
+    growPaddleNum = growPaddleNum - 1
+end
+
 local function onCollision( self, event )
     if ( event.phase == "began" ) then
         if ( self.id == "limitLine") then
@@ -56,7 +66,7 @@ local function onCollision( self, event )
         elseif ( event.other.id == "blue" ) then
             print ("blue hit")
             removeBox(event.other)
-            playerPaddle.width = playerPaddle.width + 10
+            local dr timer.performWithDelay(50,growPlayerPaddle)
         end
         print (self.id .. " : collision began with " .. event.other.id)
     end
