@@ -21,9 +21,9 @@ local controller_right = display.newRect (display.screenOriginX + display.actual
 controller_right:setFillColor( .5,.2,.2)
 controller_right.id = "Right"
 
-local myRectangle = display.newRect( 55, 300, 80, 20 )
-myRectangle:setFillColor( 0.5 )
-myRectangle.id = "le box"
+local playerPaddle = display.newRect( 55, 300, 80, 20 )
+playerPaddle:setFillColor( 0,1,0 )
+playerPaddle.id = "le box"
 
 local function onObjectTouch( event )
     if ( event.phase == "began" ) then
@@ -51,17 +51,17 @@ controller_right:addEventListener("touch", onObjectTouch )
 local myListener = function( event )
 
     if ( movingLeft ) then
-    	if ((myRectangle.x - myRectangle.width/2) - playerSpeed > display.screenOriginX) then
-            myRectangle.x = myRectangle.x - playerSpeed
+    	if ((playerPaddle.x - playerPaddle.width/2) - playerSpeed > display.screenOriginX) then
+            playerPaddle.x = playerPaddle.x - playerSpeed
         else
-            myRectangle.x = display.screenOriginX + myRectangle.width/2
+            playerPaddle.x = display.screenOriginX + playerPaddle.width/2
         end
     end
     if (movingRight) then
-        if ((myRectangle.x + myRectangle.width/2) + playerSpeed < display.actualContentWidth + display.screenOriginX) then
-        	myRectangle.x = myRectangle.x + playerSpeed
+        if ((playerPaddle.x + playerPaddle.width/2) + playerSpeed < display.actualContentWidth + display.screenOriginX) then
+        	playerPaddle.x = playerPaddle.x + playerSpeed
         else
-            myRectangle.x = display.actualContentWidth + display.screenOriginX - myRectangle.width/2
+            playerPaddle.x = display.actualContentWidth + display.screenOriginX - playerPaddle.width/2
         end
     end
 end
