@@ -31,7 +31,7 @@ local function removeBox(thisBox)
 end
 
 local function spawnBox(boxType,xStart,yStart)
-    local box = display.newRect(50,50,25,25)
+    local box = display.newRect(xStart,yStart,25,25)
     box.id = boxType
    -- transition.to(box, { time=1000 , x=math.random(-10,400), y=300, onComplete=removeBox })
     physics.addBody(box,"dynamic")
@@ -92,7 +92,7 @@ local onEnterFrame = function( event )
     if ( movingLeft ) then
         if ((playerPaddle.x - playerPaddle.width/2) - playerSpeed > display.screenOriginX) then
             playerPaddle.x = playerPaddle.x - playerSpeed
-            spawnBox("blue")
+            spawnBox("blue",100,100)
         else
             playerPaddle.x = display.screenOriginX + playerPaddle.width/2
         end
@@ -100,7 +100,7 @@ local onEnterFrame = function( event )
     if (movingRight) then
         if ((playerPaddle.x + playerPaddle.width/2) + playerSpeed < display.actualContentWidth + display.screenOriginX) then
             playerPaddle.x = playerPaddle.x + playerSpeed
-            spawnBox("red")
+            --spawnBox("red")
         else
             playerPaddle.x = display.actualContentWidth + display.screenOriginX - playerPaddle.width/2
         end
@@ -151,11 +151,12 @@ end
 
 local function spawnBoxes (event)
     print (" spanwboxes called")
+    spawnBox("red",math.random(display.screenOriginX,display.actualContentWidth),100)
 end
 
 function startLevel1()
     Runtime:addEventListener( "enterFrame", onEnterFrame )
-    timer.performWithDelay(200, spawnBoxes, -1)
+    timer.performWithDelay(1000, spawnBoxes, -1)
     playerPaddle.collision = onCollision
     playerPaddle:addEventListener("collision", playerPaddle)
 end
