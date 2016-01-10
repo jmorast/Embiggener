@@ -3,34 +3,27 @@
 -- main.lua
 --
 -----------------------------------------------------------------------------------------
+-- tag http://www.raywenderlich.com/26793/how-to-make-a-breakout-game-with-corona
 --Set up the physics world
 local physics = require( "physics" )
 physics.start()
 -- setup variables
+local playerPaddle
+local controller_left
+local controller_right
+local limitLine
+
 local movingLeft=false
 local movingRight=false
 local playerSpeed = 5
-local direction='Stopped'
+local growPaddleBy = 5
+local gameStatus = "startMenu"
 display.setStatusBar(display.HiddenStatusBar)
+local boxes = display.newGroup()
 print( "display.contentWidth:display.contentHeight " .. display.contentWidth .. ":" .. display.contentHeight)
 print( "display.actualcontentWidth:display.contentHeight " .. display.actualContentWidth .. ":" .. display.actualContentHeight)
 print( "display.viewableContentWidth    " .. display.viewableContentWidth )
 print( "display.screenOriginX " .. display.screenOriginX)
-
-
-
-local controller_left = display.newRect (display.screenOriginX + display.actualContentWidth/4, display.actualContentHeight/2, display.actualContentWidth/2, display.actualContentHeight)
-controller_left:setFillColor( .5,.1,.2)
-controller_left.id = "Left"
-
-local controller_right = display.newRect (display.screenOriginX + display.actualContentWidth/2 + display.actualContentWidth/4, display.actualContentHeight/2, display.actualContentWidth/2, display.actualContentHeight)
-controller_right:setFillColor( .5,.2,.2)
-controller_right.id = "Right"
-
-local playerPaddle = display.newRect( 55, 300, 80, 20 )
-playerPaddle:setFillColor( 0,1,0 )
-playerPaddle.id = "le box"
-physics.addBody(playerPaddle, "static")
 
 local function removeBox(thisBox)
     display.remove(thisBox)
@@ -43,14 +36,14 @@ local function spawnBox(boxType,xStart,yStart)
    -- transition.to(box, { time=1000 , x=math.random(-10,400), y=300, onComplete=removeBox })
     physics.addBody(box,"dynamic")
     if (boxType == "red") then
-        box:setFillColor( 1,0,0)
+        box:setFillColor(1,0,0)
     elseif (boxType == "blue") then
         box:setFillColor(0,0,1)
     end
 end
 
 local function growPlayerPaddle()
-    playerPaddle.width = playerPaddle.width + 10
+    playerPaddle.width = playerPaddle.width + growPaddleBy
     if not (physics.removeBody(playerPaddle)) then
         print( "Could not remove physics body" )
     end
@@ -64,6 +57,8 @@ local function onCollision( self, event )
         elseif ( event.other.id == "blue" ) then
             print ("blue hit")
             removeBox(event.other)
+            -- grow player paddle
+            -- cannot grow player paddle inside collision loop because of box2d limitations.
             local dr timer.performWithDelay(50,growPlayerPaddle)
         end
         print (self.id .. " : collision began with " .. event.other.id)
@@ -93,13 +88,9 @@ local function onObjectTouch( event )
     return true
 end
 
-controller_left:addEventListener("touch", onObjectTouch )
-controller_right:addEventListener("touch", onObjectTouch )
-
-local myListener = function( event )
-
+local onEnterFrame = function( event )
     if ( movingLeft ) then
-    	if ((playerPaddle.x - playerPaddle.width/2) - playerSpeed > display.screenOriginX) then
+        if ((playerPaddle.x - playerPaddle.width/2) - playerSpeed > display.screenOriginX) then
             playerPaddle.x = playerPaddle.x - playerSpeed
             spawnBox("blue")
         else
@@ -108,22 +99,70 @@ local myListener = function( event )
     end
     if (movingRight) then
         if ((playerPaddle.x + playerPaddle.width/2) + playerSpeed < display.actualContentWidth + display.screenOriginX) then
-        	playerPaddle.x = playerPaddle.x + playerSpeed
+            playerPaddle.x = playerPaddle.x + playerSpeed
             spawnBox("red")
         else
             playerPaddle.x = display.actualContentWidth + display.screenOriginX - playerPaddle.width/2
         end
     end
 end
-Runtime:addEventListener( "enterFrame", myListener )
-playerPaddle.collision = onCollision
-playerPaddle:addEventListener("collision", playerPaddle)
 
+function showTitleScreen()
+        titleScreenGroup = display.newGroup()
+        playBtn = display.newRect(50,50,50,50)
+        playBtn:setFillColor(0,1,0)
+        playBtn.name = "playbutton"
+        playBtn:addEventListener("tap",loadGame)
+end
 
-local limitLine = display.newRect(display.actualContentWidth/2,display.actualContentHeight*2,display.actualContentWidth *2,50)
-limitLine.strokeWidth= 2
-limitLine.id = "limitLine"
-physics.addBody(limitLine, "static")
+function loadGame(event)
+    if (event.target.name == "playbutton") then
+        transition.to(titleScreenGroup,{time=100, alpha=0, onComplete=initializeGameScreen})
+        playBtn:removeEventListener("tap", loadGame)
+    end
+end
 
-limitLine.collision = onCollision
-limitLine:addEventListener("collision", limitLine)
+function initializeGameScreen()
+    -- initialize before starting game to avoid issues with variable scoping
+    local controller_left = display.newRect (display.screenOriginX + display.actualContentWidth/4, display.actualContentHeight/2, display.actualContentWidth/2, display.actualContentHeight)
+    controller_left:setFillColor( .5,.1,.2)
+    controller_left.id = "Left"
+
+    local controller_right = display.newRect (display.screenOriginX + display.actualContentWidth/2 + display.actualContentWidth/4, display.actualContentHeight/2, display.actualContentWidth/2, display.actualContentHeight)
+    controller_right:setFillColor( .5,.2,.2)
+    controller_right.id = "Right"
+
+    playerPaddle = display.newRect( 55, 300, 80, 20 )
+    playerPaddle:setFillColor( 0,1,0 )
+    playerPaddle.id = "playerPaddle"
+    physics.addBody(playerPaddle, "static")
+
+    local limitLine = display.newRect(display.actualContentWidth/2,display.actualContentHeight*2,display.actualContentWidth *2,50)
+    limitLine.strokeWidth= 2
+    limitLine.id = "limitLine"
+    physics.addBody(limitLine, "static")
+
+    limitLine.collision = onCollision
+    limitLine:addEventListener("collision", limitLine)
+    controller_left:addEventListener("touch", onObjectTouch )
+    controller_right:addEventListener("touch", onObjectTouch )
+    startLevel1()
+end
+
+local function spawnBoxes (event)
+    print (" spanwboxes called")
+end
+
+function startLevel1()
+    Runtime:addEventListener( "enterFrame", onEnterFrame )
+    timer.performWithDelay(200, spawnBoxes, -1)
+    playerPaddle.collision = onCollision
+    playerPaddle:addEventListener("collision", playerPaddle)
+end
+
+function main()
+    print("=============================================main")
+    showTitleScreen()
+end
+
+main()
