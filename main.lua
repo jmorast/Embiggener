@@ -11,7 +11,6 @@ local movingLeft=false
 local movingRight=false
 local playerSpeed = 5
 local direction='Stopped'
-local growPaddleNum=0
 display.setStatusBar(display.HiddenStatusBar)
 print( "display.contentWidth:display.contentHeight " .. display.contentWidth .. ":" .. display.contentHeight)
 print( "display.actualcontentWidth:display.contentHeight " .. display.actualContentWidth .. ":" .. display.actualContentHeight)
@@ -56,7 +55,6 @@ local function growPlayerPaddle()
         print( "Could not remove physics body" )
     end
     physics.addBody(playerPaddle, "static")
-    growPaddleNum = growPaddleNum - 1
 end
 
 local function onCollision( self, event )
