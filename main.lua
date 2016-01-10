@@ -3,6 +3,7 @@
 -- main.lua
 --
 -----------------------------------------------------------------------------------------
+-- setup variables
 local movingLeft=false
 local movingRight=false
 local playerSpeed = 5
@@ -24,6 +25,21 @@ controller_right.id = "Right"
 local playerPaddle = display.newRect( 55, 300, 80, 20 )
 playerPaddle:setFillColor( 0,1,0 )
 playerPaddle.id = "le box"
+
+local function removeBox(thisBox)
+    display.remove(thisBox)
+    thisBox=nil
+end
+
+local function spawnBox(boxType,x,y)
+    local box = display.newRect(50,50,25,25)
+    transition.to(box, { time=1000 , x=math.random(-10,400), y=200, onComplete=removeBox })
+    if (boxType == "red") then
+        box:setFillColor( 1,0,0)
+    elseif (boxType == "blue") then
+        box:setFillColor(0,0,1)
+    end
+end
 
 local function onObjectTouch( event )
     if ( event.phase == "began" ) then
@@ -53,6 +69,7 @@ local myListener = function( event )
     if ( movingLeft ) then
     	if ((playerPaddle.x - playerPaddle.width/2) - playerSpeed > display.screenOriginX) then
             playerPaddle.x = playerPaddle.x - playerSpeed
+            spawnBox("blue")
         else
             playerPaddle.x = display.screenOriginX + playerPaddle.width/2
         end
@@ -60,6 +77,7 @@ local myListener = function( event )
     if (movingRight) then
         if ((playerPaddle.x + playerPaddle.width/2) + playerSpeed < display.actualContentWidth + display.screenOriginX) then
         	playerPaddle.x = playerPaddle.x + playerSpeed
+            spawnBox("red")
         else
             playerPaddle.x = display.actualContentWidth + display.screenOriginX - playerPaddle.width/2
         end
