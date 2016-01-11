@@ -7,3 +7,10 @@ ssh-keygen
 Add .ssh/id_rsa.pub to SSH settings in github
 then
 git remote set-url origin git@github.com:jmorast/Embiggener.git
+
+
+Notes:  
+
+start menu flow idea:
+http://www.raywenderlich.com/26793/how-to-make-a-breakout-game-with-corona
+

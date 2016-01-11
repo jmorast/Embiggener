@@ -3,7 +3,6 @@
 -- main.lua
 --
 -----------------------------------------------------------------------------------------
--- tag http://www.raywenderlich.com/26793/how-to-make-a-breakout-game-with-corona
 --Set up the physics world
 local physics = require( "physics" )
 physics.start()
