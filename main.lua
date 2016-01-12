@@ -16,6 +16,7 @@ local movingLeft=false
 local movingRight=false
 local playerSpeed = 5
 local growPaddleBy = 5
+local playerPaddleSize = 20
 local gameStatus = "startMenu"
 display.setStatusBar(display.HiddenStatusBar)
 local boxes = display.newGroup()
@@ -30,7 +31,7 @@ local function removeBox(thisBox)
 end
 
 local function spawnBox(boxType,xStart,yStart)
-    local box = display.newRect(xStart,yStart,25,25)
+    local box = display.newRect(xStart,yStart,10,10)
     box.id = boxType
    -- transition.to(box, { time=1000 , x=math.random(-10,400), y=300, onComplete=removeBox })
     physics.addBody(box,"dynamic")
@@ -60,7 +61,7 @@ local function onCollision( self, event )
             -- cannot grow player paddle inside collision loop because of box2d limitations.
             local dr timer.performWithDelay(50,growPlayerPaddle)
         end
-        print (self.id .. " : collision began with " .. event.other.id)
+        --print (self.id .. " : collision began with " .. event.other.id)
     end
     if ( event.phase == "ended") then
         print (self.id .. " : collision began with " .. event.other.id)
@@ -131,7 +132,7 @@ function initializeGameScreen()
     controller_right:setFillColor( .5,.2,.2)
     controller_right.id = "Right"
 
-    playerPaddle = display.newRect( 55, 300, 80, 20 )
+    playerPaddle = display.newRect( 55, 300, playerPaddleSize, 20 )
     playerPaddle:setFillColor( 0,1,0 )
     playerPaddle.id = "playerPaddle"
     physics.addBody(playerPaddle, "static")
@@ -149,13 +150,36 @@ function initializeGameScreen()
 end
 
 local function spawnBoxes (event)
-    print (" spanwboxes called")
-    spawnBox("red",math.random(display.screenOriginX,display.actualContentWidth),100)
+    spawnBox("red",math.random(display.screenOriginX,display.actualContentWidth),-100)
 end
+
+local function spawnGroup (event)
+    local patternPicker = math.random(1,3)
+    print ("Spawn Group: " .. patternPicker)
+    if (patternPicker == 1) then
+        for i=1,playerPaddle.width,1 do
+            spawnBox("red",math.random(display.screenOriginX,display.actualContentWidth), math.random(10,30)*-1)
+        end
+    elseif (patternPicker == 2) then
+        print("spawn /")
+        local startPoint=math.random(display.screenOriginX + 50, display.actualContentWidth/2)
+        for i=1,playerPaddle.width,1 do
+            spawnBox("red",startPoint + i * 40, -10 + -10 * i)
+        end
+    elseif (patternPicker == 3) then
+        print "spawn "
+        local startPoint=math.random(display.actualContentWidth/2, display.actualContentWidth - 100)
+         for i=playerPaddle.width,1,-1 do
+            spawnBox("red",startPoint - i * 40, -10 + -10 * i)
+        end
+    end
+end
+
 
 function startLevel1()
     Runtime:addEventListener( "enterFrame", onEnterFrame )
     timer.performWithDelay(1000, spawnBoxes, -1)
+    timer.performWithDelay(5000, spawnGroup, -1)
     playerPaddle.collision = onCollision
     playerPaddle:addEventListener("collision", playerPaddle)
 end
