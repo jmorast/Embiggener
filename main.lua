@@ -37,8 +37,10 @@ local function spawnBox(boxType,xStart,yStart)
     physics.addBody(box,"dynamic")
     if (boxType == "red") then
         box:setFillColor(1,0,0)
+        box.myName = "red"
     elseif (boxType == "blue") then
         box:setFillColor(0,0,1)
+        box.myName = "blue"
     end
 end
 
@@ -52,6 +54,7 @@ end
 
 local function onCollision( self, event )
     if ( event.phase == "began" ) then
+        print ("--------------------------------------------------------------------")
         if ( self.id == "limitLine") then
             removeBox(event.other)
         elseif ( event.other.id == "blue" ) then
@@ -127,23 +130,27 @@ function initializeGameScreen()
     local controller_left = display.newRect (display.screenOriginX + display.actualContentWidth/4, display.actualContentHeight/2, display.actualContentWidth/2, display.actualContentHeight)
     controller_left:setFillColor( .5,.1,.2)
     controller_left.id = "Left"
+    controller_left.myName = "Left"
 
     local controller_right = display.newRect (display.screenOriginX + display.actualContentWidth/2 + display.actualContentWidth/4, display.actualContentHeight/2, display.actualContentWidth/2, display.actualContentHeight)
     controller_right:setFillColor( .5,.2,.2)
     controller_right.id = "Right"
+    controller_right.myName = "Right"
 
     playerPaddle = display.newRect( 55, 300, playerPaddleSize, 20 )
     playerPaddle:setFillColor( 0,1,0 )
     playerPaddle.id = "playerPaddle"
+    playerPaddle.myName = "playerPaddle"
     physics.addBody(playerPaddle, "static")
 
     local limitLine = display.newRect(display.actualContentWidth/2,display.actualContentHeight*2,display.actualContentWidth *2,50)
     limitLine.strokeWidth= 2
     limitLine.id = "limitLine"
+    limitLine.myName = "limitLine"
     physics.addBody(limitLine, "static")
 
-    limitLine.collision = onCollision
-    limitLine:addEventListener("collision", limitLine)
+    --limitLine.collision = onCollision
+    --limitLine:addEventListener("collision", limitLine)
     controller_left:addEventListener("touch", onObjectTouch )
     controller_right:addEventListener("touch", onObjectTouch )
     startLevel1()
@@ -175,13 +182,25 @@ local function spawnGroup (event)
     end
 end
 
+local function onGlobalCollision( event )
+    print ("=====================================")
+    if ( event.phase == "began" ) then
+        print( "began: " .. event.object1.myName .. " and " .. event.object2.myName )
+
+    elseif ( event.phase == "ended" ) then
+        print( "ended: " .. event.object1.myName .. " and " .. event.object2.myName )
+    end
+end
+
+
 
 function startLevel1()
     Runtime:addEventListener( "enterFrame", onEnterFrame )
     timer.performWithDelay(1000, spawnBoxes, -1)
     timer.performWithDelay(5000, spawnGroup, -1)
-    playerPaddle.collision = onCollision
-    playerPaddle:addEventListener("collision", playerPaddle)
+ --   playerPaddle.collision = onCollision
+--    playerPaddle:addEventListener("collision", playerPaddle)
+    Runtime:addEventListener( "collision", onGlobalCollision )
 end
 
 function main()
