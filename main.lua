@@ -193,29 +193,34 @@ local function spawnGroup (event)
     end
 end
 
-local function pixelBurst(objEnem)
-        local function DestroyPop(Obj)
-            display.remove(Obj)
-            Obj = nil
-        end
+
+
+local function burstBox(startX,startY,dir)
+    local function DestroyPop(Obj)
+        display.remove(Obj)
+        Obj = nil
+    end
     timer.performWithDelay(5, function()
-            local function createParts()
-                timer.performWithDelay(5, function()
+        local function createParts()
+            --timer.performWithDelay(5, function()
+                for i=1,5 do
                     starRnd = math.random
-                    partDown = display.newRect(0,0,5,5)
+                    partDown = display.newRect(0,0,10,10)
                     partDown:setFillColor(200,200,0)
+                    partDown.myName = "explosion"
                     physics.addBody( partDown, "dynamic",{ density = 1.5, isSensor=true } )
-                    partDown.x = objEnem.x+(starRnd(-5, 5))
-                    partDown.y = objEnem.y
-                    partDown:applyForce(1*(starRnd(-5,5)),-13, partDown.x*(starRnd(1,10)), partDown.y)
+                    partDown.x = startX --+(starRnd(-5, 5))
+                    partDown.y = startY
+                    partDown:applyForce(dir*(starRnd(5,15)),-1*starRnd(20,50), partDown.x*(starRnd(1,5)), partDown.y)
                     partDown:applyTorque(5*starRnd(5,10))
                     transition.to(partDown, {time=1500, onComplete=DestroyPop})
                     --gridGroup:insert(partDown)
                     return partDown
-                end, 15)
-            end
-        createParts()
-        end, 1)
+                end
+            --end, 5)
+        end
+    createParts()
+    end, 1)
 end
 
 
@@ -234,16 +239,21 @@ local function onGlobalCollision( event )
             event.object1 = nil
         elseif ( event.object1.myName == "playerPaddle") then
             if ( event.object2.myName == "blue") then
+                local burstX=event.object2.x
+                local burstY=event.object2.y
+                local burstDir=1
                 if ( event.object1.x > event.object2.x ) then
                     print (" Blue collision left side")
-                   -- spawnBox("blue",event.object2.x,event.object2.y)
-                   pixelBurst(event.object2)
-                   -- explodeOnDeath(event.object2,1)
-                    --event.object2:removeSelf()
-                    --event.object2=nil
+                    burstDir=-1
                 else
-                    print (" Blue collision right side ")
+                    print ("blue collision right side")
+                    burstDir=1
                 end
+                event.object2:removeSelf()
+                event.object2=nil
+                burstBox(burstX,burstY,burstDir)
+                --spawnBox("blue",event.object2.x,event.object2.y)
+                -- explodeOnDeath(event.object2,1)
             end
         elseif (event.object1.y > display.actualContentHeight ) then
             print ("=====================================")
