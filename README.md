@@ -14,3 +14,5 @@ Notes:
 start menu flow idea:
 http://www.raywenderlich.com/26793/how-to-make-a-breakout-game-with-corona
 
+great lil explosion snippit:
+https://forums.coronalabs.com/topic/48477-explosion-in-collision/
