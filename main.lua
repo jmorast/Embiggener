@@ -26,11 +26,17 @@ print( "display.viewableContentWidth    " .. display.viewableContentWidth )
 print( "display.screenOriginX " .. display.screenOriginX)
 
 local function removeBox(thisBox)
-    display.remove(thisBox)
-    thisBox=nil
+   -- if not(physics.removeBody(thisBox)) then
+   --     print ("could not remove physics body")
+   -- end
+   -- display.remove(thisBox)
+   -- thisBox=nil
+   thisBox:removeSelf()
+   thisBox=nil
+
 end
 
-local function spawnBox(boxType,xStart,yStart)
+local function spawnBox(boxType,xStart,yStart,angle)
     local box = display.newRect(xStart,yStart,10,10)
     box.id = boxType
    -- transition.to(box, { time=1000 , x=math.random(-10,400), y=300, onComplete=removeBox })
@@ -95,7 +101,7 @@ local onEnterFrame = function( event )
     if ( movingLeft ) then
         if ((playerPaddle.x - playerPaddle.width/2) - playerSpeed > display.screenOriginX) then
             playerPaddle.x = playerPaddle.x - playerSpeed
-            spawnBox("blue",100,100)
+            --spawnBox("blue",100,100)
         else
             playerPaddle.x = display.screenOriginX + playerPaddle.width/2
         end
@@ -143,7 +149,7 @@ function initializeGameScreen()
     playerPaddle.myName = "playerPaddle"
     physics.addBody(playerPaddle, "static")
 
-    local limitLine = display.newRect(display.actualContentWidth/2,display.actualContentHeight*2,display.actualContentWidth *2,50)
+    local limitLine = display.newRect(display.actualContentWidth/2,display.actualContentHeight*2,display.actualContentWidth *3,50)
     limitLine.strokeWidth= 2
     limitLine.id = "limitLine"
     limitLine.myName = "limitLine"
@@ -156,8 +162,13 @@ function initializeGameScreen()
     startLevel1()
 end
 
-local function spawnBoxes (event)
+local function spawnRandomReds (event)
     spawnBox("red",math.random(display.screenOriginX,display.actualContentWidth),-100)
+end
+
+local function spawnRandomBlues (event)
+    --spawnBox("blue",math.random(display.screenOriginX,display.actualContentWidth),-100)
+    spawnBox("blue",100,-100)
 end
 
 local function spawnGroup (event)
@@ -182,13 +193,64 @@ local function spawnGroup (event)
     end
 end
 
-local function onGlobalCollision( event )
-    print ("=====================================")
-    if ( event.phase == "began" ) then
-        print( "began: " .. event.object1.myName .. " and " .. event.object2.myName )
+local function pixelBurst(objEnem)
+        local function DestroyPop(Obj)
+            display.remove(Obj)
+            Obj = nil
+        end
+    timer.performWithDelay(5, function()
+            local function createParts()
+                timer.performWithDelay(5, function()
+                    starRnd = math.random
+                    partDown = display.newRect(0,0,5,5)
+                    partDown:setFillColor(200,200,0)
+                    physics.addBody( partDown, "dynamic",{ density = 1.5, isSensor=true } )
+                    partDown.x = objEnem.x+(starRnd(-5, 5))
+                    partDown.y = objEnem.y
+                    partDown:applyForce(1*(starRnd(-5,5)),-13, partDown.x*(starRnd(1,10)), partDown.y)
+                    partDown:applyTorque(5*starRnd(5,10))
+                    transition.to(partDown, {time=1500, onComplete=DestroyPop})
+                    --gridGroup:insert(partDown)
+                    return partDown
+                end, 15)
+            end
+        createParts()
+        end, 1)
+end
 
+
+local function onGlobalCollision( event )
+   
+    if ( event.phase == "began" ) then
+       
+        if ( event.object1.myName == "limitLine") then
+            -- cannot grow player paddle inside collision loop because of box2d limitations.
+            --local dr timer.performWithDelay(50,removeBox(event.object2))
+            event.object2:removeSelf()
+            event.object2 = nil
+            --removeBox(event.object2)      
+        elseif ( event.object2.myName == "limitLine") then
+            event.object1:removeSelf()
+            event.object1 = nil
+        elseif ( event.object1.myName == "playerPaddle") then
+            if ( event.object2.myName == "blue") then
+                if ( event.object1.x > event.object2.x ) then
+                    print (" Blue collision left side")
+                   -- spawnBox("blue",event.object2.x,event.object2.y)
+                   pixelBurst(event.object2)
+                   -- explodeOnDeath(event.object2,1)
+                    --event.object2:removeSelf()
+                    --event.object2=nil
+                else
+                    print (" Blue collision right side ")
+                end
+            end
+        elseif (event.object1.y > display.actualContentHeight ) then
+            print ("=====================================")
+            --print( "began: " .. event.object1.myName .. " and " .. event.object2.myName )
+        end
     elseif ( event.phase == "ended" ) then
-        print( "ended: " .. event.object1.myName .. " and " .. event.object2.myName )
+       -- print( "ended: " .. event.object1.myName .. " and " .. event.object2.myName )
     end
 end
 
@@ -196,7 +258,8 @@ end
 
 function startLevel1()
     Runtime:addEventListener( "enterFrame", onEnterFrame )
-    timer.performWithDelay(1000, spawnBoxes, -1)
+    timer.performWithDelay(1000, spawnRandomReds, -1)
+    timer.performWithDelay(800, spawnRandomBlues, -1)
     timer.performWithDelay(5000, spawnGroup, -1)
  --   playerPaddle.collision = onCollision
 --    playerPaddle:addEventListener("collision", playerPaddle)
