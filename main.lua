@@ -11,6 +11,7 @@ local playerPaddle
 local controller_left
 local controller_right
 local limitLine
+local boxTable = {}
 
 local movingLeft=false
 local movingRight=false
