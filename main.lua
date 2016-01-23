@@ -210,12 +210,18 @@ local function burstBox(startX,startY,dir)
         partDown = display.newRect(0,0,10,10)
         partDown:setFillColor(200,200,0)
         partDown.myName = "explosion"
-        physics.addBody( partDown, "dynamic",{ density = 1.5, isSensor=true } )
+        physics.addBody( partDown, "dynamic",{ density = 1, gravity=.75, isSensor=true } )
         partDown.x = startX --+(starRnd(-5, 5))
         partDown.y = startY
-        partDown:applyForce(dir*(starRnd(5,15)),-1*starRnd(40,80), partDown.x*(starRnd(1,5)), partDown.y)
-        partDown:applyTorque(5*starRnd(5,10))
+        if ( dir == 0 ) then
+            partDown:applyForce(starRnd(-15,15),starRnd(-20,20), partDown.x*(starRnd(1,5)), partDown.y)
+            --partDown:applyTorque(5*starRnd(5,10))
+        else
+            partDown:applyForce(dir*(starRnd(5,15)),-1*starRnd(10,60), partDown.x*(starRnd(1,5)), partDown.y)
+           -- partDown:applyTorque(5*starRnd(5,10))
+        end
         transition.to(partDown, {time=1500, onComplete=DestroyPop})
+        --transition.fadeOut(partDown, {time=1500, onComplete=DestroyPop})
     end
     timer.performWithDelay(1, function()
         local function createParts()
@@ -260,6 +266,19 @@ local function onGlobalCollision( event )
                 burstBox(burstX,burstY,burstDir)
                 --spawnBox("blue",event.object2.x,event.object2.y)
                 -- explodeOnDeath(event.object2,1)
+                --local dr timer.performWithDelay(50,growPlayerPaddle)
+                 playerPaddle.width = playerPaddle.width + growPaddleBy
+            end
+        elseif ( event.object1.myName == "explosion") then
+            if ( event.object1.y > 0 ) then
+                if ( event.object2.myName == "red") then
+                    print ("here we go")
+                    burstBox(event.object2.x,event.object2.y,0)
+                    event.object1:removeSelf()
+                    event.object1=nil
+                    event.object2:removeSelf()
+                    event.object2=nil
+                end
             end
         elseif (event.object1.y > display.actualContentHeight ) then
             print ("=====================================")
