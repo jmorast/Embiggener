@@ -25,6 +25,9 @@ print( "display.contentWidth:display.contentHeight " .. display.contentWidth .. 
 print( "display.actualcontentWidth:display.contentHeight " .. display.actualContentWidth .. ":" .. display.actualContentHeight)
 print( "display.viewableContentWidth    " .. display.viewableContentWidth )
 print( "display.screenOriginX " .. display.screenOriginX)
+local gx, gy = physics.getGravity()
+print( "x gravity: " .. gx .. ", y gravity: " .. gy )
+physics.setGravity( 0, 6 )
 
 local function removeBox(thisBox)
    -- if not(physics.removeBody(thisBox)) then
@@ -36,6 +39,8 @@ local function removeBox(thisBox)
    thisBox=nil
 
 end
+
+
 
 local function spawnBox(boxType,xStart,yStart,angle)
     local box = display.newRect(xStart,yStart,10,10)
@@ -201,24 +206,24 @@ local function burstBox(startX,startY,dir)
         display.remove(Obj)
         Obj = nil
     end
-    timer.performWithDelay(5, function()
+    local function createShard()
+        partDown = display.newRect(0,0,10,10)
+        partDown:setFillColor(200,200,0)
+        partDown.myName = "explosion"
+        physics.addBody( partDown, "dynamic",{ density = 1.5, isSensor=true } )
+        partDown.x = startX --+(starRnd(-5, 5))
+        partDown.y = startY
+        partDown:applyForce(dir*(starRnd(5,15)),-1*starRnd(40,80), partDown.x*(starRnd(1,5)), partDown.y)
+        partDown:applyTorque(5*starRnd(5,10))
+        transition.to(partDown, {time=1500, onComplete=DestroyPop})
+    end
+    timer.performWithDelay(1, function()
         local function createParts()
-            --timer.performWithDelay(5, function()
-                for i=1,5 do
-                    starRnd = math.random
-                    partDown = display.newRect(0,0,10,10)
-                    partDown:setFillColor(200,200,0)
-                    partDown.myName = "explosion"
-                    physics.addBody( partDown, "dynamic",{ density = 1.5, isSensor=true } )
-                    partDown.x = startX --+(starRnd(-5, 5))
-                    partDown.y = startY
-                    partDown:applyForce(dir*(starRnd(5,15)),-1*starRnd(20,50), partDown.x*(starRnd(1,5)), partDown.y)
-                    partDown:applyTorque(5*starRnd(5,10))
-                    transition.to(partDown, {time=1500, onComplete=DestroyPop})
-                    --gridGroup:insert(partDown)
-                    return partDown
-                end
-            --end, 5)
+            starRnd = math.random
+            for i=1,starRnd(3,7) do
+                createShard()
+            end
+    
         end
     createParts()
     end, 1)
